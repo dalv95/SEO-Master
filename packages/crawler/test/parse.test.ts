@@ -23,6 +23,8 @@ const html = `<!doctype html>
   <a href="https://other.com/x" rel="nofollow">Other</a>
   <a href="mailto:a@b.c">Mail</a>
   <a href="https://www.example.com/o-nas"><img src="/logo.png" alt="Logo"></a>
+  <a href="https://facebook.com/x" aria-label="Facebook"><svg><path d=""/></svg></a>
+  <a href="/ig" title="Instagram"><svg><path d=""/></svg></a>
   <script>var ignored = "lots of words here";</script>
   <p>jeden dwa trzy</p>
 </body></html>`;
@@ -52,9 +54,11 @@ describe("parseHtml", () => {
       ["https://example.com/kontakt", true],
       ["https://other.com/x", false],
       ["https://www.example.com/o-nas", true],
+      ["https://facebook.com/x", false],
+      ["https://example.com/ig", true],
     ]);
     expect(p.links[1]?.rel).toBe("nofollow");
-    expect(p.links[2]?.text).toBe("Logo");
+    expect(p.links.slice(2).map((l) => l.text)).toEqual(["Logo", "Facebook", "Instagram"]);
   });
 
   it("collects headings, images, mixed content and word count", () => {

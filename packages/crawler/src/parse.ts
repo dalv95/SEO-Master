@@ -78,7 +78,13 @@ export function parseHtml(html: string, url: string): ParsedHtml {
       return [
         {
           href,
-          text: clean($el.text()) || clean($el.find("img").attr("alt") ?? ""),
+          // Accessible name: visible text, then aria-label/title (icon links), then image alt / SVG title.
+          text:
+            clean($el.text()) ||
+            clean($el.attr("aria-label") ?? "") ||
+            clean($el.attr("title") ?? "") ||
+            clean($el.find("img[alt]").attr("alt") ?? "") ||
+            clean($el.find("svg title").first().text()),
           rel: ($el.attr("rel") ?? "").toLowerCase(),
           internal: isSameSite(href, url),
         },
