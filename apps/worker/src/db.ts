@@ -56,6 +56,7 @@ export async function saveResults(auditId: string, crawl: CrawlResult, audit: Au
       category: i.category,
       severity: i.severity,
       message: i.message,
+      params: tx.json(i.params as never),
       evidence: i.evidence ?? null,
       fix_hint: i.fixHint ? tx.json(i.fixHint as never) : null,
     }));

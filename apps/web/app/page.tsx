@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Shell } from "@/components/shell";
 import { Panel, Score } from "@/components/ui";
 import { displayUrl, timeAgo } from "@/lib/format";
+import { getT } from "@/lib/i18n";
 import { requireUser } from "@/lib/supabase/server";
 import type { AuditRow, ProjectRow } from "@/lib/types";
 import { NewProjectForm } from "./new-project-form";
@@ -9,7 +10,7 @@ import { NewProjectForm } from "./new-project-form";
 type ProjectWithAudits = ProjectRow & { audits: Pick<AuditRow, "score" | "status" | "created_at">[] };
 
 export default async function Dashboard() {
-  const { supabase, user } = await requireUser();
+  const [{ supabase, user }, { t, locale }] = await Promise.all([requireUser(), getT()]);
   const { data } = await supabase
     .from("projects")
     .select("id, name, url, created_at, audits(score, status, created_at)")
@@ -22,12 +23,9 @@ export default async function Dashboard() {
     <Shell email={user.email}>
       <div className="grid gap-10 lg:grid-cols-[1fr_20rem]">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Your sites</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t.dashboard.title}</h1>
           {projects.length === 0 ? (
-            <p className="mt-4 max-w-md text-ink-soft">
-              Add a website to run its first audit. We&apos;ll crawl it, check every page against 30+ SEO rules and
-              show what to fix first.
-            </p>
+            <p className="mt-4 max-w-md text-ink-soft">{t.dashboard.empty}</p>
           ) : (
             <Panel className="mt-6 divide-y divide-rule">
               {projects.map((p) => {
@@ -45,7 +43,11 @@ export default async function Dashboard() {
                     <div className="text-right">
                       <Score value={last?.score ?? null} className="text-2xl font-bold" />
                       <p className="text-xs text-ink-soft">
-                        {!last ? "no audits" : last.status === "completed" ? timeAgo(last.created_at) : last.status}
+                        {!last
+                          ? t.dashboard.noAudits
+                          : last.status === "completed"
+                            ? timeAgo(last.created_at, locale)
+                            : t.status[last.status]}
                       </p>
                     </div>
                   </Link>
@@ -56,8 +58,8 @@ export default async function Dashboard() {
         </div>
         <aside>
           <Panel className="p-5">
-            <h2 className="font-semibold">Add a site</h2>
-            <NewProjectForm />
+            <h2 className="font-semibold">{t.dashboard.addSite}</h2>
+            <NewProjectForm t={t.dashboard} />
           </Panel>
         </aside>
       </div>

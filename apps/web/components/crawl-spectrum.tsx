@@ -1,5 +1,6 @@
 import type { Severity } from "@seo-master/shared";
 import { pathOf } from "@/lib/format";
+import type { Dictionary } from "@/lib/i18n/en";
 
 export interface SpectrumPage {
   url: string;
@@ -15,18 +16,13 @@ const FILL: Record<SpectrumPage["worst"], string> = {
   clean: "var(--good)",
 };
 
-const LEGEND: [SpectrumPage["worst"], string][] = [
-  ["critical", "Critical"],
-  ["warning", "Warning"],
-  ["notice", "Notices only"],
-  ["clean", "No issues"],
-];
+const LEGEND = ["critical", "warning", "notice", "clean"] as const;
 
 /**
  * Every crawled page as one vertical bar, in crawl order, coloured by its worst issue.
  * Bar height encodes issue count so problem clusters stand out.
  */
-export function CrawlSpectrum({ pages }: { pages: SpectrumPage[] }) {
+export function CrawlSpectrum({ pages, t }: { pages: SpectrumPage[]; t: Dictionary["spectrum"] }) {
   const max = Math.max(1, ...pages.map((p) => p.issues));
   const counts = pages.reduce<Record<string, number>>((acc, p) => {
     const k = p.worst === "error" ? "critical" : p.worst;
@@ -40,23 +36,23 @@ export function CrawlSpectrum({ pages }: { pages: SpectrumPage[] }) {
         preserveAspectRatio="none"
         className="h-20 w-full"
         role="img"
-        aria-label={`${pages.length} crawled pages coloured by their most severe issue`}
+        aria-label={t.aria(pages.length)}
       >
         {pages.map((p, i) => {
           const h = p.worst === "clean" ? 30 : 30 + (70 * p.issues) / max;
           return (
             <rect key={p.url} x={i + 0.08} y={100 - h} width={0.84} height={h} fill={FILL[p.worst]}>
-              <title>{`${pathOf(p.url)} — ${p.worst === "clean" ? "no issues" : `${p.issues} issue(s)`}`}</title>
+              <title>{`${pathOf(p.url)} — ${p.worst === "clean" ? t.noIssues : t.issues(p.issues)}`}</title>
             </rect>
           );
         })}
       </svg>
       <figcaption className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-soft">
-        <span>Each bar is one page, in crawl order · taller = more issues</span>
-        {LEGEND.map(([k, label]) => (
+        <span>{t.caption}</span>
+        {LEGEND.map((k) => (
           <span key={k} className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-3 w-1.5" style={{ background: FILL[k] }} />
-            {label} <span className="tabular-nums text-ink">{counts[k] ?? 0}</span>
+            <span className="inline-block h-3 w-1.5 print:[print-color-adjust:exact]" style={{ background: FILL[k] }} />
+            {t.legend[k]} <span className="tabular-nums text-ink">{counts[k] ?? 0}</span>
           </span>
         ))}
       </figcaption>

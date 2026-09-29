@@ -1,10 +1,10 @@
-import { ruleById } from "@seo-master/seo-rules";
+import { issueMessage, ruleText, type Locale } from "@seo-master/seo-rules";
 import type { AuditResult, CrawlResult, Issue } from "@seo-master/shared";
 
 const ICON = { critical: "✖", warning: "▲", notice: "•" } as const;
 
 /** Plain-text report for the CLI. */
-export function formatReport(crawl: CrawlResult, audit: AuditResult, maxUrlsPerRule = 5): string {
+export function formatReport(crawl: CrawlResult, audit: AuditResult, locale: Locale = "en", maxUrlsPerRule = 5): string {
   const lines: string[] = [];
   lines.push(`\nSEO audit: ${crawl.startUrl}`);
   lines.push(`Pages crawled: ${crawl.pages.length} · robots.txt: ${crawl.robotsTxt.found ? "yes" : "no"} · sitemap: ${crawl.sitemap.found ? `${crawl.sitemap.urls.length} URLs` : "no"}`);
@@ -18,11 +18,11 @@ export function formatReport(crawl: CrawlResult, audit: AuditResult, maxUrlsPerR
 
   lines.push(`\nIssues (${audit.issues.length}):`);
   for (const [ruleId, issues] of byRule) {
-    const rule = ruleById.get(ruleId);
+    const text = ruleText(locale, ruleId);
     const first = issues[0]!;
-    lines.push(`\n${ICON[first.severity]} [${first.severity}] ${rule?.title ?? ruleId} (${ruleId}) — ${issues.length}×`);
+    lines.push(`\n${ICON[first.severity]} [${first.severity}] ${text?.title ?? ruleId} (${ruleId}) — ${issues.length}×`);
     for (const i of issues.slice(0, maxUrlsPerRule)) {
-      lines.push(`    ${i.url}\n      ${i.message}${i.evidence ? `\n      ↳ ${i.evidence}` : ""}`);
+      lines.push(`    ${i.url}\n      ${issueMessage(locale, i.ruleId, i.params, i.message)}${i.evidence ? `\n      ↳ ${i.evidence}` : ""}`);
     }
     if (issues.length > maxUrlsPerRule) lines.push(`    … and ${issues.length - maxUrlsPerRule} more`);
   }

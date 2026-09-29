@@ -36,6 +36,7 @@ Env: a single `.env.local` at the repo root (see `.env.example`), loaded by both
 
 ## Conventions
 - **Audit rules are pure functions** defined with `pageRule` (per 200 HTML page), `anyPageRule` (every URL incl. errors) or `siteRule` from `packages/seo-rules/src/rule.ts`. No network or DB access inside a rule. Rules are grouped by category in `packages/seo-rules/src/rules/*.ts` and registered in `src/index.ts`. Test new rules in `test/rules.test.ts` using the `goodHtml`/`htmlPage`/`site` helpers (a clean site must keep producing zero issues and score 100).
+- **Rules never contain user-facing text.** A finding returns `params`; the title, message template and "how to fix" help live in `packages/seo-rules/src/texts/{en,pl}.ts` (Polish plurals via `plural()`). A new rule needs entries in both files — `test/texts.test.ts` enforces this and checks no message renders `undefined`. The DB stores `rule_id` + `params` (+ English `message` as fallback); render with `issueMessage(locale, ...)`.
 - Rules that depend on seeing the whole site (e.g. orphan pages) must check `ctx.crawl.truncated`.
 - `ctx.htmlPages` is deduplicated by final URL — a redirecting URL and its target are one document.
 - Every `Issue` has a stable `ruleId` (kebab-case, e.g. `meta-title-missing`), a `category`, a `severity`, and a `fixHint` whenever the fix is mechanical.
@@ -44,7 +45,8 @@ Env: a single `.env.local` at the repo root (see `.env.example`), loaded by both
 - Database: schema changes only as new files in `supabase/migrations/`. RLS on every table; users can read their data and insert `queued` audits only — status/results are written by the worker, which connects directly via `DATABASE_URL` (bypasses RLS).
 - DB row types for the web app live in `apps/web/lib/types.ts` (replace with generated Supabase types once a project is linked).
 - Secrets only in `.env.local` (never commit). Update `.env.example` when adding a variable.
-- Code, identifiers, comments and rule messages in English; UI copy is English for now, PL translation planned.
+- Code, identifiers and comments in English. UI is bilingual (PL default, EN): all UI strings go in `apps/web/lib/i18n/en.ts` + `pl.ts` (the `Dictionary` type keeps them in sync). Server components use `await getT()`; client components get the strings they need as props — never import `lib/i18n/index.ts` (server-only) from client code; `lib/i18n/intl.ts` is client-safe.
+- Exports: `/audits/[id]/csv` (`;`-separated for PL Excel, BOM) and `/audits/[id]/print` (print-optimized page → browser "Save as PDF"). Shared report data loading lives in `apps/web/lib/audit-report.ts`.
 - UI design tokens (colors as CSS variables with dark mode) are in `apps/web/app/globals.css`; use the Tailwind names (`bg-panel`, `text-ink-soft`, `text-critical`, …) instead of raw colors.
 
 ## Crawler rules

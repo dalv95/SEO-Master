@@ -9,12 +9,13 @@ const { positionals, values } = parseArgs({
   options: {
     max: { type: "string", default: "100" },
     json: { type: "string" },
+    lang: { type: "string", default: "en" },
   },
 });
 
 const url = positionals[0];
 if (!url) {
-  console.error("Usage: pnpm audit:cli <url> [--max 100] [--json report.json]");
+  console.error("Usage: pnpm audit:cli <url> [--max 100] [--lang pl|en] [--json report.json]");
   process.exit(1);
 }
 
@@ -24,7 +25,7 @@ const result = await crawl(url, {
 });
 process.stderr.write("\n");
 const audit = runAudit(result);
-console.log(formatReport(result, audit));
+console.log(formatReport(result, audit, values.lang === "pl" ? "pl" : "en"));
 
 if (values.json) {
   await writeFile(values.json, JSON.stringify({ crawl: result, audit }, null, 2));

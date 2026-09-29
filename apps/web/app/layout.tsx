@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Schibsted_Grotesk } from "next/font/google";
+import { getLocale } from "@/lib/i18n";
 import "./globals.css";
 
 const sans = Schibsted_Grotesk({ subsets: ["latin", "latin-ext"], variable: "--font-schibsted" });
@@ -10,9 +11,9 @@ export const metadata: Metadata = {
   description: "Crawl a site, find what hurts its search visibility, and fix the worst first.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
+    <html lang={await getLocale()} className={`${sans.variable} ${mono.variable}`}>
       <body className="min-h-dvh font-sans antialiased">{children}</body>
     </html>
   );

@@ -23,12 +23,17 @@ export interface FixHint {
   value?: string;
 }
 
+/** Values a rule fills into its localized message template (see seo-rules/src/texts). */
+export type IssueParams = Record<string, string | number | boolean | undefined>;
+
 export interface Issue {
   ruleId: string;
   category: IssueCategory;
   severity: Severity;
   url: string;
+  /** English message, kept for the CLI and as a fallback. */
   message: string;
+  params: IssueParams;
   evidence?: string;
   fixHint?: FixHint;
 }

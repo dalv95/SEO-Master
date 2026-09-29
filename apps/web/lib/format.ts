@@ -1,16 +1,5 @@
-import type { IssueCategory } from "@seo-master/shared";
-
-export const CATEGORY_LABEL: Record<IssueCategory, string> = {
-  indexability: "Indexability",
-  meta: "Titles & meta",
-  content: "Content",
-  links: "Links",
-  images: "Images",
-  "structured-data": "Structured data",
-  social: "Social",
-  security: "Security",
-  performance: "Performance",
-};
+import type { Locale } from "@seo-master/seo-rules";
+import { INTL_LOCALE } from "./i18n/intl";
 
 export const displayUrl = (url: string) => url.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
@@ -24,8 +13,8 @@ export function pathOf(url: string): string {
   }
 }
 
-const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
-export function timeAgo(iso: string): string {
+export function timeAgo(iso: string, locale: Locale): string {
+  const rtf = new Intl.RelativeTimeFormat(INTL_LOCALE[locale], { numeric: "auto" });
   const s = (new Date(iso).getTime() - Date.now()) / 1000;
   const units: [Intl.RelativeTimeFormatUnit, number][] = [
     ["day", 86400],
@@ -33,8 +22,11 @@ export function timeAgo(iso: string): string {
     ["minute", 60],
   ];
   for (const [unit, secs] of units) if (Math.abs(s) >= secs) return rtf.format(Math.round(s / secs), unit);
-  return "just now";
+  return rtf.format(0, "second");
 }
+
+export const formatDate = (iso: string, locale: Locale, time = false) =>
+  new Date(iso).toLocaleString(INTL_LOCALE[locale], time ? { dateStyle: "medium", timeStyle: "short" } : { dateStyle: "medium" });
 
 export function scoreTone(score: number | null): "good" | "fair" | "poor" | "none" {
   if (score === null) return "none";

@@ -41,3 +41,4 @@ export function runAudit(crawl: CrawlResult, ruleset: Rule[] = rules): AuditResu
 export { buildContext, type AuditContext } from "./context";
 export type { Rule, Finding } from "./rule";
 export { CATEGORY_WEIGHT } from "./score";
+export * from "./texts";

@@ -1,4 +1,4 @@
-import type { CategoryScore, FixHint, IssueCategory, Severity } from "@seo-master/shared";
+import type { CategoryScore, FixHint, IssueCategory, IssueParams, Severity } from "@seo-master/shared";
 
 export type AuditStatus = "queued" | "running" | "completed" | "failed";
 
@@ -46,6 +46,8 @@ export interface AuditIssueRow {
   category: IssueCategory;
   severity: Severity;
   message: string;
+  /** null for issues stored before messages became parametrized. */
+  params: IssueParams | null;
   evidence: string | null;
   fix_hint: FixHint | null;
 }
