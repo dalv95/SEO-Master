@@ -12,6 +12,14 @@ export function plural(n: unknown, one: string, few: string, many: string): stri
 const chars = (n: unknown) => plural(n, "znak", "znaki", "znaków");
 const pages = (n: unknown) => plural(n, "inna strona", "inne strony", "innych stron");
 const words = (n: unknown) => plural(n, "słowo", "słowa", "słów");
+const secs = (ms: unknown) => `${(Number(ms) / 1000).toFixed(1).replace(".", ",")} s`;
+const decimal = (n: unknown) => String(n).replace(".", ",");
+const device = (strategy: unknown) => (strategy === "desktop" ? "komputerze" : "telefonie");
+const SOURCE: Record<string, string> = {
+  field: "prawdziwi użytkownicy",
+  origin: "prawdziwi użytkownicy, cała witryna",
+  lab: "test laboratoryjny",
+};
 const links = (n: unknown) => plural(n, "link", "linki", "linków");
 
 export const pl: RuleTexts = {
@@ -202,5 +210,33 @@ export const pl: RuleTexts = {
     title: "Duży dokument HTML",
     message: (p) => `HTML waży ${p.kb} KB (> ${p.maxKb} KB).`,
     help: "Duży HTML spowalnia ładowanie. Usuń osadzone dane i skrypty, podziel długie listy na strony albo doładowuj sekcje później.",
+  },
+  "cwv-lcp-slow": {
+    title: "Wolne ładowanie głównej treści (LCP)",
+    message: (p) =>
+      `Główna treść pojawia się po ${secs(p.ms)} na ${device(p.strategy)} (${SOURCE[String(p.source)]}); powinno być ≤ ${secs(p.max)}.`,
+    help: "LCP to jeden z Core Web Vitals, które Google bierze pod uwagę w rankingu. Skompresuj i zmniejsz główny obrazek (WebP/AVIF), wczytuj go z wyprzedzeniem (preload), usuń blokujące CSS/JS i przyspiesz odpowiedź serwera.",
+  },
+  "cwv-inp-slow": {
+    title: "Wolna reakcja na interakcje (INP)",
+    message: (p) =>
+      `Strona reaguje na kliknięcia i dotknięcia po ${p.ms} ms na ${device(p.strategy)} (${SOURCE[String(p.source)]}); powinno być ≤ ${p.max} ms.`,
+    help: "INP to Core Web Vital mierzący responsywność. Podziel długie zadania JavaScript, usuń nieużywane skrypty i zewnętrzne widżety, a mniej ważne operacje odłóż na później.",
+  },
+  "cwv-cls-high": {
+    title: "Przesunięcia układu strony (CLS)",
+    message: (p) =>
+      `Treść przeskakuje podczas ładowania: CLS ${decimal(p.cls)} na ${device(p.strategy)} (${SOURCE[String(p.source)]}); powinno być ≤ ${decimal(p.max)}.`,
+    help: "CLS to Core Web Vital. Podaj szerokość i wysokość obrazków oraz osadzonych elementów, zarezerwuj miejsce na reklamy i banery i nie wstawiaj treści nad tym, co jest już widoczne.",
+  },
+  "pagespeed-score-low": {
+    title: "Niski wynik PageSpeed",
+    message: (p) => `Wynik wydajności PageSpeed to ${p.score}/100 na ${device(p.strategy)}.`,
+    help: "W sekcji „Szybkość” tego raportu znajdziesz największe możliwości poprawy wskazane przez Lighthouse, od największej szacowanej oszczędności.",
+  },
+  "pagespeed-failed": {
+    title: "Test PageSpeed się nie powiódł",
+    message: (p) => `PageSpeed nie mógł przetestować strony na ${device(p.strategy)}: ${p.error}`,
+    help: "Google musi móc wczytać stronę z internetu. Sprawdź, czy jest publicznie dostępna i nie blokuje narzędzia Lighthouse, a potem uruchom audyt ponownie.",
   },
 };

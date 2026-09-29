@@ -17,7 +17,7 @@ Full roadmap: `docs/PLAN.md`.
 - `packages/seo-rules` — audit rules + scoring
 - `packages/shared` — shared types (`Issue`, `Severity`, `FixHint`, …) and zod schemas
 - Supabase (Postgres + Auth + RLS); SQL migrations in `supabase/migrations/`. Project: `seo-master`, ref `bwaospsabqcpwddrrrhq` (eu-central-1, free plan) — apply new migrations there via the Supabase MCP `apply_migration`, then check `get_advisors`.
-- PageSpeed Insights API for Core Web Vitals
+- PageSpeed Insights API (`packages/crawler/src/pagespeed.ts`): after the crawl the worker tests the start page (mobile + desktop) and the most-linked pages (mobile), stores results in `audits.pagespeed`. Rules in `seo-rules/src/rules/pagespeed.ts` prefer CrUX real-user data over lab values and score against the tested sample (`Rule.population`), not all crawled pages. Lighthouse 12+ reports opportunities as "insights"; PL titles for insight ids are in the web dictionary (`insights`).
 - Claude API (`claude-sonnet-5-5`) for issue prioritization and plain-language recommendations
 - Vitest for tests, ESLint + Prettier
 

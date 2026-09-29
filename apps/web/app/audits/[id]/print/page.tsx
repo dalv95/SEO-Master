@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CrawlSpectrum } from "@/components/crawl-spectrum";
+import { SpeedPanel } from "@/components/speed-panel";
 import { PrintButton, PrintOnLoad } from "@/components/print-on-load";
 import { ReportSummary } from "@/components/report-summary";
 import { Brand } from "@/components/shell";
@@ -55,6 +56,10 @@ export default async function PrintReport({ params }: { params: Promise<{ id: st
       <section className="mt-6 break-inside-avoid rounded-lg border border-rule p-4 print:[print-color-adjust:exact]">
         <CrawlSpectrum pages={buildSpectrum(pages, issuesPerUrl(issues))} t={t.spectrum} />
       </section>
+
+      <div className="break-inside-avoid print:[print-color-adjust:exact]">
+        <SpeedPanel results={audit.pagespeed} t={t} locale={locale} />
+      </div>
 
       <h2 className="mt-8 text-xl font-bold tracking-tight">{t.audit.whatToFix}</h2>
       {groups.map((g) => (

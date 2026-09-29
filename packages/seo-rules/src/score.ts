@@ -21,7 +21,7 @@ export const CATEGORY_WEIGHT: Record<IssueCategory, number> = {
  * Each rule's penalty scales with the share of pages it affects (site-wide rules count as 100%),
  * so a single bad page on a large site doesn't tank the score.
  */
-export function scoreIssues(issues: Issue[], rules: Rule[], pageCount: number) {
+export function scoreIssues(issues: Issue[], rules: Rule[], population: (rule: Rule) => number) {
   const affected = new Map<string, Set<string>>();
   for (const i of issues) {
     if (!affected.has(i.ruleId)) affected.set(i.ruleId, new Set());
@@ -32,7 +32,7 @@ export function scoreIssues(issues: Issue[], rules: Rule[], pageCount: number) {
   for (const rule of rules) {
     const urls = affected.get(rule.id);
     if (!urls) continue;
-    const share = Math.min(1, urls.size / Math.max(1, pageCount));
+    const share = Math.min(1, urls.size / Math.max(1, population(rule)));
     // Floor at 20% of the penalty so any occurrence is visible in the score.
     const p = RULE_PENALTY[rule.severity] * Math.max(0.2, share);
     penalty.set(rule.category, (penalty.get(rule.category) ?? 0) + p);

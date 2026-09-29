@@ -1,6 +1,13 @@
 import type { RuleTexts } from "./types";
 
 const s = (n: unknown, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+const secs = (ms: unknown) => `${(Number(ms) / 1000).toFixed(1)} s`;
+const device = (strategy: unknown) => (strategy === "desktop" ? "desktop" : "mobile");
+const SOURCE: Record<string, string> = {
+  field: "real users",
+  origin: "real users, whole site",
+  lab: "lab test",
+};
 
 export const en: RuleTexts = {
   "meta-title-missing": {
@@ -188,5 +195,33 @@ export const en: RuleTexts = {
     title: "Large HTML document",
     message: (p) => `HTML is ${p.kb} KB (> ${p.maxKb} KB).`,
     help: "Large HTML slows loading. Remove inline data and scripts, paginate long lists or load sections later.",
+  },
+  "cwv-lcp-slow": {
+    title: "Slow Largest Contentful Paint (LCP)",
+    message: (p) =>
+      `The main content appears after ${secs(p.ms)} on ${device(p.strategy)} (${SOURCE[String(p.source)]}); should be ≤ ${secs(p.max)}.`,
+    help: "LCP is a Core Web Vital used in Google ranking. Compress and resize the main image (WebP/AVIF), preload it, avoid render-blocking CSS/JS and speed up the server response.",
+  },
+  "cwv-inp-slow": {
+    title: "Slow Interaction to Next Paint (INP)",
+    message: (p) =>
+      `The page reacts to clicks and taps after ${p.ms} ms on ${device(p.strategy)} (${SOURCE[String(p.source)]}); should be ≤ ${p.max} ms.`,
+    help: "INP is a Core Web Vital measuring responsiveness. Break up long JavaScript tasks, remove unused scripts and third-party widgets, and defer non-essential work.",
+  },
+  "cwv-cls-high": {
+    title: "Layout shifts (CLS)",
+    message: (p) =>
+      `Content jumps while loading: CLS ${p.cls} on ${device(p.strategy)} (${SOURCE[String(p.source)]}); should be ≤ ${p.max}.`,
+    help: "CLS is a Core Web Vital. Set width and height on images and embeds, reserve space for ads and banners, and avoid inserting content above what's already visible.",
+  },
+  "pagespeed-score-low": {
+    title: "Low PageSpeed score",
+    message: (p) => `PageSpeed performance score is ${p.score}/100 on ${device(p.strategy)}.`,
+    help: "See the Speed section of this report for the biggest opportunities Lighthouse found, starting with the largest estimated savings.",
+  },
+  "pagespeed-failed": {
+    title: "PageSpeed test failed",
+    message: (p) => `PageSpeed couldn't test this page on ${device(p.strategy)}: ${p.error}`,
+    help: "Google must be able to load the page from the internet. Check that it's publicly reachable and doesn't block Google's Lighthouse user agent; then run the audit again.",
   },
 };

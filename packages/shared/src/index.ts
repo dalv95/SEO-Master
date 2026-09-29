@@ -98,6 +98,29 @@ export interface ParsedPage {
   raw?: { title: string | null; wordCount: number; linkCount: number };
 }
 
+export type PageSpeedStrategy = "mobile" | "desktop";
+
+/** Google PageSpeed Insights result for one URL and device. */
+export interface PageSpeedResult {
+  url: string;
+  strategy: PageSpeedStrategy;
+  /** Lighthouse performance score 0–100. */
+  score: number | null;
+  /** Lighthouse lab measurements. */
+  lab: { lcpMs: number | null; cls: number | null; tbtMs: number | null; fcpMs: number | null; siMs: number | null };
+  /** Chrome UX Report (real users, p75) for this URL, or the whole origin as fallback; null for low-traffic sites. */
+  field: {
+    source: "url" | "origin";
+    lcpMs: number | null;
+    inpMs: number | null;
+    cls: number | null;
+    category: "FAST" | "AVERAGE" | "SLOW" | null;
+  } | null;
+  /** Failing Lighthouse insights, biggest estimated savings first. */
+  opportunities: { id: string; title: string; savingsMs: number; displayValue?: string }[];
+  error?: string;
+}
+
 export type RenderMode = "auto" | "always" | "never";
 export const RENDER_MODES: RenderMode[] = ["auto", "always", "never"];
 
@@ -109,6 +132,8 @@ export interface CrawlResult {
   sitemap: { found: boolean; urls: string[] };
   /** True when the crawl stopped at maxPages with URLs still queued. */
   truncated: boolean;
+  /** PageSpeed Insights results for the most important pages (absent when no API key is configured). */
+  pageSpeed?: PageSpeedResult[];
   /** Whether pages were rendered with JavaScript, and why (for "auto"). */
   rendering: { mode: RenderMode; used: boolean; reason?: string };
   startedAt: string;

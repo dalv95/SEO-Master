@@ -42,20 +42,33 @@ describe("rule texts", () => {
     });
     const failed = statusPage("/timeout", 0, { error: "fetch failed" });
     const orphan = htmlPage("/orphan", goodHtml("/orphan"));
+    const slow = { lcpMs: 5000, cls: 0.4, tbtMs: 900, fcpMs: 3000, siMs: 6000 };
     const r = runAudit(
       site([home, bad, dupA, dupB, statusPage("/gone", 404), old, failed, orphan], {
         robotsTxt: { found: false, disallowedUrls: [] },
         sitemap: { found: false, urls: [`${ORIGIN}/gone`] },
+        pageSpeed: [
+          { url: `${ORIGIN}/`, strategy: "mobile", score: 30, lab: slow, opportunities: [],
+            field: { source: "origin", lcpMs: 4100, inpMs: 420, cls: 0.3, category: "SLOW" } },
+          { url: `${ORIGIN}/`, strategy: "desktop", score: 40, lab: slow, field: null, opportunities: [] },
+          { url: `${ORIGIN}/bad`, strategy: "mobile", score: null, lab: slow, field: null, opportunities: [], error: "boom" },
+        ],
       }),
     );
 
     // Most rules should be exercised by this fixture.
-    expect(new Set(r.issues.map((i) => i.ruleId)).size).toBeGreaterThanOrEqual(28);
+    expect(new Set(r.issues.map((i) => i.ruleId)).size).toBeGreaterThanOrEqual(33);
     for (const issue of r.issues)
       for (const locale of LOCALES) {
         const msg = issueMessage(locale, issue.ruleId, issue.params, issue.message);
         expect(msg, `${locale}:${issue.ruleId}`).not.toMatch(/undefined|NaN|\[object/);
       }
+  });
+
+  it("formats PageSpeed numbers per locale", () => {
+    const params = { ms: 3832, max: 2500, strategy: "mobile", source: "lab" };
+    expect(issueMessage("pl", "cwv-lcp-slow", params, "")).toContain("3,8 s na telefonie (test laboratoryjny)");
+    expect(issueMessage("en", "cwv-lcp-slow", params, "")).toContain("3.8 s on mobile (lab test)");
   });
 
   it("falls back to the stored message for issues without params", () => {

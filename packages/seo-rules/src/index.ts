@@ -5,6 +5,7 @@ import { contentRules } from "./rules/content";
 import { indexabilityRules } from "./rules/indexability";
 import { linkRules } from "./rules/links";
 import { metaRules } from "./rules/meta";
+import { pageSpeedRules } from "./rules/pagespeed";
 import {
   imageRules,
   performanceRules,
@@ -24,6 +25,7 @@ export const rules: Rule[] = [
   ...socialRules,
   ...securityRules,
   ...performanceRules,
+  ...pageSpeedRules,
 ];
 
 export const ruleById = new Map(rules.map((r) => [r.id, r]));
@@ -35,7 +37,10 @@ export function runAudit(crawl: CrawlResult, ruleset: Rule[] = rules): AuditResu
   const issues = ruleset
     .flatMap((r) => r.run(ctx))
     .sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity]);
-  return { ...scoreIssues(issues, ruleset, ctx.htmlPages.length), issues };
+  return {
+    ...scoreIssues(issues, ruleset, (rule) => rule.population?.(ctx) ?? ctx.htmlPages.length),
+    issues,
+  };
 }
 
 export { buildContext, type AuditContext } from "./context";

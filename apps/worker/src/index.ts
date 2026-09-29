@@ -1,6 +1,6 @@
-import { crawl } from "@seo-master/crawler";
+import { crawl, runPageSpeedForCrawl } from "@seo-master/crawler";
 import { runAudit } from "@seo-master/seo-rules";
-import { claimNextAudit, failAudit, requeueStale, saveResults, sql, updateProgress } from "./db";
+import { claimNextAudit, failAudit, requeueStale, saveResults, setStage, sql, updateProgress } from "./db";
 import { env } from "./env";
 
 let stopping = false;
@@ -27,6 +27,15 @@ async function processNext(): Promise<boolean> {
         }
       },
     });
+    if (env.PAGESPEED_API_KEY) {
+      await setStage(job.id, "pagespeed", result.pages.length);
+      result.pageSpeed = await runPageSpeedForCrawl(result, {
+        apiKey: env.PAGESPEED_API_KEY,
+        maxPages: env.PAGESPEED_MAX_PAGES,
+      });
+      const failed = result.pageSpeed.filter((r) => r.error).length;
+      console.log(`  PageSpeed: ${result.pageSpeed.length - failed} ok, ${failed} failed`);
+    }
     const audit = runAudit(result);
     await saveResults(job.id, result, audit);
     console.log(
@@ -40,7 +49,9 @@ async function processNext(): Promise<boolean> {
 }
 
 await requeueStale();
-console.log("SEO Master worker started, polling for queued audits…");
+console.log(
+  `SEO Master worker started, polling for queued audits… (PageSpeed ${env.PAGESPEED_API_KEY ? "on" : "off: no PAGESPEED_API_KEY"})`,
+);
 while (!stopping) {
   const didWork = await processNext().catch((e) => {
     console.error("worker loop error", e);

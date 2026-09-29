@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ISSUE_CATEGORIES, type IssueCategory, type Severity } from "@seo-master/shared";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { CrawlSpectrum } from "@/components/crawl-spectrum";
+import { SpeedPanel } from "@/components/speed-panel";
 import { ReportSummary } from "@/components/report-summary";
 import { Shell } from "@/components/shell";
 import { Panel, SeverityDot } from "@/components/ui";
@@ -57,7 +58,11 @@ export default async function AuditPage({
           ) : (
             <>
               <h1 className="text-2xl font-bold">
-                {audit.status === "queued" ? t.audit.queuedTitle : t.audit.runningTitle}
+                {audit.status === "queued"
+                  ? t.audit.queuedTitle
+                  : audit.crawl_summary?.stage === "pagespeed"
+                    ? t.speed.testing
+                    : t.audit.runningTitle}
               </h1>
               <p className="mt-2 font-mono text-ink-soft">{t.audit.progress(audit.pages_crawled, audit.max_pages)}</p>
               <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-rule">
@@ -127,6 +132,8 @@ export default async function AuditPage({
       <Panel className="mt-8 p-5">
         <CrawlSpectrum pages={buildSpectrum(pages, perUrl)} t={t.spectrum} />
       </Panel>
+
+      <SpeedPanel results={audit.pagespeed} t={t} locale={locale} />
 
       <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl font-bold tracking-tight">

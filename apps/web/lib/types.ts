@@ -1,4 +1,4 @@
-import type { CategoryScore, CrawlResult, FixHint, IssueCategory, IssueParams, RenderMode, Severity } from "@seo-master/shared";
+import type { CategoryScore, CrawlResult, FixHint, IssueCategory, IssueParams, PageSpeedResult, RenderMode, Severity } from "@seo-master/shared";
 
 export type AuditStatus = "queued" | "running" | "completed" | "failed";
 
@@ -18,7 +18,10 @@ export interface AuditRow {
   pages_crawled: number;
   score: number | null;
   category_scores: CategoryScore[] | null;
+  pagespeed: PageSpeedResult[] | null;
   crawl_summary: {
+    /** While running: the worker has finished crawling and is testing speed. */
+    stage?: "pagespeed";
     robotsTxt: { found: boolean; disallowed: number };
     sitemap: { found: boolean; urls: number };
     /** Missing on audits run before JS rendering existed. */

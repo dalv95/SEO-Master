@@ -16,10 +16,15 @@ export interface Rule {
   severity: Severity;
   /** English title (localized titles: `ruleText(locale, id)`). */
   title: string;
+  /**
+   * Number of pages the rule could have flagged, for scoring the share of affected pages.
+   * Defaults to all crawled HTML pages; sampled checks (PageSpeed) use their sample size.
+   */
+  population?: (ctx: AuditContext) => number;
   run(ctx: AuditContext): Issue[];
 }
 
-type Meta = Pick<Rule, "id" | "category" | "severity">;
+type Meta = Pick<Rule, "id" | "category" | "severity" | "population">;
 type Out = Finding | Finding[] | null | undefined | false;
 
 function define(meta: Meta, run: (emit: (url: string, out: Out) => Issue[], ctx: AuditContext) => Issue[]): Rule {

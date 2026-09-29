@@ -93,6 +93,27 @@ export const en = {
     exportPdf: "Save as PDF",
   },
 
+  speed: {
+    title: "Speed (Google PageSpeed)",
+    testing: "Testing speed with Google PageSpeed…",
+    notRun: "PageSpeed wasn't run for this audit. Add PAGESPEED_API_KEY to enable speed tests.",
+    device: { mobile: "Mobile", desktop: "Desktop" },
+    page: "Page",
+    score: "Score",
+    failed: "test failed",
+    fieldUrl: "Real-user data (Chrome UX Report, last 28 days).",
+    fieldOrigin: "Real-user data for the whole site (this page has too little traffic on its own).",
+    labOnly:
+      "No real-user data: the site has too little traffic for the Chrome UX Report, so these are lab measurements. INP needs real users and isn't available.",
+    opportunities: "What would make it faster",
+    savings: (ms: number) => `up to ${(ms / 1000).toFixed(1)} s faster`,
+    pages: (n: number) => s(n, "page"),
+    legend: "LCP — main content visible · INP — reaction to clicks · CLS — layout shifts · TBT — blocked main thread (lab)",
+  },
+
+  /** Lighthouse insight titles by audit id; English uses the title PSI returns. */
+  insights: {} as Record<string, string>,
+
   csv: {
     severity: "Severity",
     category: "Category",

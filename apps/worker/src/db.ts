@@ -28,6 +28,11 @@ export async function updateProgress(auditId: string, pagesCrawled: number) {
   await sql`update audits set pages_crawled = ${pagesCrawled} where id = ${auditId}`;
 }
 
+/** Shown on the progress page while PageSpeed runs after the crawl. */
+export async function setStage(auditId: string, stage: "pagespeed", pagesCrawled: number) {
+  await sql`update audits set crawl_summary = ${sql.json({ stage })}, pages_crawled = ${pagesCrawled} where id = ${auditId}`;
+}
+
 const CHUNK = 500;
 
 export async function saveResults(auditId: string, crawl: CrawlResult, audit: AuditResult) {
@@ -69,6 +74,7 @@ export async function saveResults(auditId: string, crawl: CrawlResult, audit: Au
         finished_at = now(),
         pages_crawled = ${crawl.pages.length},
         score = ${audit.score},
+        pagespeed = ${crawl.pageSpeed ? tx.json(crawl.pageSpeed as never) : null},
         category_scores = ${tx.json(audit.categories as never)},
         crawl_summary = ${tx.json({
           robotsTxt: { found: crawl.robotsTxt.found, disallowed: crawl.robotsTxt.disallowedUrls.length },

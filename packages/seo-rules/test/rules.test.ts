@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runAudit } from "../src";
+import type { PageSpeedResult } from "@seo-master/shared";
 import { goodHtml, htmlPage, ORIGIN, site, statusPage } from "./helpers";
 
 const ids = (r: ReturnType<typeof runAudit>) => [...new Set(r.issues.map((i) => i.ruleId))].sort();
@@ -92,6 +93,41 @@ describe("runAudit", () => {
     const js = r.issues.filter((i) => i.ruleId === "js-dependent-content");
     expect(js.map((i) => i.url)).toEqual([`${ORIGIN}/a`]);
     expect(js[0]?.params).toMatchObject({ rawWords: 3, rawLinks: 0 });
+  });
+
+  it("reports Core Web Vitals from PageSpeed, preferring real-user data", () => {
+    const psi = (url: string, over: Partial<PageSpeedResult> = {}): PageSpeedResult => ({
+      url,
+      strategy: "mobile",
+      score: 95,
+      lab: { lcpMs: 1200, cls: 0.01, tbtMs: 0, fcpMs: 800, siMs: 1500 },
+      field: null,
+      opportunities: [],
+      ...over,
+    });
+    const r = runAudit(
+      site([home(), pageA()], {
+        pageSpeed: [
+          psi(`${ORIGIN}/`, { score: 42, lab: { lcpMs: 5200, cls: 0.3, tbtMs: 900, fcpMs: 2000, siMs: 6000 } }),
+          // Real users are fine even though the lab test is slow: no LCP issue.
+          psi(`${ORIGIN}/a`, {
+            lab: { lcpMs: 4000, cls: 0, tbtMs: 0, fcpMs: 900, siMs: 2000 },
+            field: { source: "url", lcpMs: 2100, inpMs: 350, cls: 0.02, category: "AVERAGE" },
+          }),
+          psi(`${ORIGIN}/`, { strategy: "desktop", error: "FAILED_DOCUMENT_REQUEST" }),
+        ],
+      }),
+    );
+    const found = r.issues.map((i) => `${i.ruleId} ${i.url.replace(ORIGIN, "")} ${i.params.source ?? ""}`.trim()).sort();
+    expect(found).toEqual([
+      "cwv-cls-high / lab",
+      "cwv-inp-slow /a field",
+      "cwv-lcp-slow / lab",
+      "pagespeed-failed /",
+      "pagespeed-score-low /",
+    ]);
+    // Sampled: 1 of 2 tested pages is a 50% share, not 1 of all crawled pages.
+    expect(r.categories.find((c) => c.category === "performance")!.score).toBeLessThan(80);
   });
 
   it("lowers the score proportionally to affected pages", () => {
