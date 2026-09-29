@@ -14,6 +14,7 @@
     "@seo-master/seo-rules": "workspace:*",
     "@seo-master/shared": "workspace:*",
     "postgres": "^3.4.5",
-    "zod": "^3.24.0"
+    "zod": "^3.24.0",
+    "@seo-master/google": "workspace:*"
   }
 }

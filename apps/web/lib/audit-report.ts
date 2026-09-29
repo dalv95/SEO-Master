@@ -87,3 +87,29 @@ export function groupIssues(issues: AuditIssueRow[], locale: Locale): IssueGroup
     })
     .sort((a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity] || b.issues.length - a.issues.length);
 }
+
+const trafficKey = (url: string) => url.replace(/#.*$/, "").replace(/\/$/, "").toLowerCase();
+
+/**
+ * Clicks per page over the last 28 imported days of Search Console data, or null when the
+ * project isn't linked / has no data yet. Keys are normalized (no trailing slash, lower case).
+ */
+export async function loadPageTraffic(supabase: SupabaseClient, project: ProjectRow) {
+  if (!project.gsc_property) return null;
+  const { data: last } = await supabase
+    .from("gsc_daily")
+    .select("date")
+    .eq("project_id", project.id)
+    .order("date", { ascending: false })
+    .limit(1)
+    .maybeSingle<{ date: string }>();
+  if (!last) return null;
+  const from = new Date(Date.parse(`${last.date}T00:00:00Z`) - 27 * 86_400_000).toISOString().slice(0, 10);
+  const { data } = await supabase.rpc("gsc_page_stats", { p_project: project.id, p_from: from, p_to: last.date });
+  const map = new Map<string, number>();
+  for (const r of (data ?? []) as { page: string; clicks: number }[]) {
+    const k = trafficKey(r.page);
+    map.set(k, (map.get(k) ?? 0) + Number(r.clicks));
+  }
+  return { clicksFor: (url: string) => map.get(trafficKey(url)) ?? 0 };
+}

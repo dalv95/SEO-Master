@@ -11,11 +11,13 @@
   },
   "dependencies": {
     "@next/env": "15.5.26",
+    "@seo-master/google": "workspace:^",
     "@seo-master/seo-rules": "workspace:*",
     "@seo-master/shared": "workspace:*",
     "@supabase/ssr": "^0.6.0",
     "@supabase/supabase-js": "^2.49.0",
     "next": "^15.5.0",
+    "postgres": "^3.4.5",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "server-only": "^0.0.1",

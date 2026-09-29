@@ -7,7 +7,7 @@ import type { NextConfig } from "next";
 loadEnvConfig(path.resolve(process.cwd(), "../.."), process.env.NODE_ENV !== "production", console, true);
 
 const config: NextConfig = {
-  transpilePackages: ["@seo-master/shared", "@seo-master/seo-rules"],
+  transpilePackages: ["@seo-master/shared", "@seo-master/seo-rules", "@seo-master/google"],
 };
 
 export default config;

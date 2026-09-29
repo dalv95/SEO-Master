@@ -26,6 +26,9 @@ importers:
       '@next/env':
         specifier: 15.5.26
         version: 15.5.26
+      '@seo-master/google':
+        specifier: workspace:^
+        version: link:../../packages/google
       '@seo-master/seo-rules':
         specifier: workspace:*
         version: link:../../packages/seo-rules
@@ -41,6 +44,9 @@ importers:
       next:
         specifier: ^15.5.0
         version: 15.5.26(@types/node@22.20.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      postgres:
+        specifier: ^3.4.5
+        version: 3.4.9
       react:
         specifier: ^19.1.0
         version: 19.3.0
@@ -72,6 +78,9 @@ importers:
       '@seo-master/crawler':
         specifier: workspace:*
         version: link:../../packages/crawler
+      '@seo-master/google':
+        specifier: workspace:*
+        version: link:../../packages/google
       '@seo-master/seo-rules':
         specifier: workspace:*
         version: link:../../packages/seo-rules
@@ -99,6 +108,8 @@ importers:
       robots-parser:
         specifier: ^3.0.1
         version: 3.0.1
+
+  packages/google: {}
 
   packages/seo-rules:
     dependencies:

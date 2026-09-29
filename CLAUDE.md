@@ -7,7 +7,7 @@ SEO Master ("AutoSEO") — a web app that crawls a website / web app, audits it 
 - **Now (stages 1–3):** analysis only — crawl, audit rules, scoring, reports, AI summary, audit history, Google Search Console.
 - **Later (stage 4):** applying fixes automatically. The delivery channel (GitHub PR / WordPress REST / JS snippet or edge worker) is **not decided yet** — do not build fix-application code until it is. Keep emitting structured `fixHint`s so that module can be added without changing the rules.
 
-Full roadmap: `docs/PLAN.md`.
+Full roadmap: `docs/PLAN.md`. Product direction (customer = SEO agencies; action plan + copy-paste fixes rather than auto-applied changes; no link exchange or mass AI content): `docs/PRODUCT.md`.
 
 ## Stack
 - pnpm workspaces monorepo, TypeScript (strict) everywhere
@@ -15,9 +15,12 @@ Full roadmap: `docs/PLAN.md`.
 - `apps/worker` — Node process (run with `tsx`) that claims queued rows from the `audits` table (`for update skip locked` — the table *is* the job queue), crawls, audits and writes results with `postgres`. Also has a DB-free CLI.
 - `packages/crawler` — fetch with manual redirect tracking, robots.txt, sitemap.xml, link-first BFS then sitemap URLs. JavaScript rendering via Playwright (`src/render.ts`): per audit `render_mode` auto|always|never. "auto" renders the start page once and keeps rendering only if `contentNeedsJs()` says JS changes what crawlers see. Status/redirects/headers always come from the plain HTTP fetch; rendered pages keep raw-HTML stats in `page.raw` (used by the `js-dependent-content` rule). Browser: Playwright's bundled Chromium, else installed Google Chrome (`channel: "chrome"` — needed on macOS 13, which current Playwright Chromium doesn't support), or `CHROME_PATH`.
 - `packages/seo-rules` — audit rules + scoring
+- `packages/google` — Google OAuth (Search Console scope), Search Console API client with paging/retries, property matching, AES-256-GCM token encryption
 - `packages/shared` — shared types (`Issue`, `Severity`, `FixHint`, …) and zod schemas
 - Supabase (Postgres + Auth + RLS); SQL migrations in `supabase/migrations/`. Project: `seo-master`, ref `bwaospsabqcpwddrrrhq` (eu-central-1, free plan) — apply new migrations there via the Supabase MCP `apply_migration`, then check `get_advisors`.
 - PageSpeed Insights API (`packages/crawler/src/pagespeed.ts`): after the crawl the worker tests the start page (mobile + desktop) and the most-linked pages (mobile), stores results in `audits.pagespeed`. Rules in `seo-rules/src/rules/pagespeed.ts` prefer CrUX real-user data over lab values and score against the tested sample (`Rule.population`), not all crawled pages. Lighthouse 12+ reports opportunities as "insights"; PL titles for insight ids are in the web dictionary (`insights`).
+- Google Search Console: a user connects their Google account once (`/api/google/connect` → `/api/google/callback`; agencies' accounts see many client properties), then links a property per project. Refresh tokens are encrypted with `TOKEN_ENCRYPTION_KEY` and stored in `google_connections.refresh_token_enc`, which has **no column grant** for API roles — read it only server-side via `apps/web/lib/db.ts` / the worker (`DATABASE_URL`). The worker syncs due projects between audits (`apps/worker/src/gsc.ts`): `gsc_daily` exact totals for 16 months, `gsc_rows` query × page detail for 120 days (initial 90-day import, then the last 5 days every 12 h). Analyses (striking distance, declining pages, cannibalization, totals) are pure functions in `packages/seo-rules/src/gsc/`; windows are aggregated in SQL functions `gsc_query_page_stats` / `gsc_page_stats` (security invoker, so RLS applies). The audit report shows 28-day clicks per page and sorts issues by traffic.
+- Charts: follow the `dataviz` skill (one measure per chart, no dual axes, hover + table fallback). Client chart components must not format dates/numbers with `Intl` (Node and browser ICU differ → hydration errors); format on the server and pass labels.
 - Claude API (`claude-sonnet-5-5`) for issue prioritization and plain-language recommendations
 - Vitest for tests, ESLint + Prettier
 

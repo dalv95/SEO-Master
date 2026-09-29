@@ -2,6 +2,9 @@ import { crawl, runPageSpeedForCrawl } from "@seo-master/crawler";
 import { runAudit } from "@seo-master/seo-rules";
 import { claimNextAudit, failAudit, requeueStale, saveResults, setStage, sql, updateProgress } from "./db";
 import { env } from "./env";
+import { gscEnabled, syncDueProjects } from "./gsc";
+
+const GSC_CHECK_INTERVAL_MS = 60_000;
 
 let stopping = false;
 for (const sig of ["SIGINT", "SIGTERM"] as const) {
@@ -50,9 +53,15 @@ async function processNext(): Promise<boolean> {
 
 await requeueStale();
 console.log(
-  `SEO Master worker started, polling for queued audits… (PageSpeed ${env.PAGESPEED_API_KEY ? "on" : "off: no PAGESPEED_API_KEY"})`,
+  `SEO Master worker started, polling for queued audits… (PageSpeed ${env.PAGESPEED_API_KEY ? "on" : "off: no PAGESPEED_API_KEY"}, Search Console sync ${gscEnabled() ? "on" : "off: GOOGLE_CLIENT_ID/SECRET or TOKEN_ENCRYPTION_KEY missing"})`,
 );
+let lastGscCheck = 0;
 while (!stopping) {
+  // Audits first; Search Console sync runs between audits at most once a minute.
+  if (Date.now() - lastGscCheck > GSC_CHECK_INTERVAL_MS) {
+    lastGscCheck = Date.now();
+    await syncDueProjects().catch((e) => console.error("GSC sync error", e));
+  }
   const didWork = await processNext().catch((e) => {
     console.error("worker loop error", e);
     return false;

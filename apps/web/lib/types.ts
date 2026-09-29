@@ -7,6 +7,9 @@ export interface ProjectRow {
   name: string;
   url: string;
   created_at: string;
+  gsc_property: string | null;
+  gsc_synced_at: string | null;
+  gsc_sync_error: string | null;
 }
 
 export interface AuditRow {

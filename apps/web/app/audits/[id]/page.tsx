@@ -13,6 +13,7 @@ import {
   issuesPerUrl,
   loadAudit,
   loadAuditDetails,
+  loadPageTraffic,
   SEVERITIES,
 } from "@/lib/audit-report";
 import { pathOf } from "@/lib/format";
@@ -79,7 +80,10 @@ export default async function AuditPage({
     );
   }
 
-  const { issues, pages } = await loadAuditDetails(supabase, id);
+  const [{ issues, pages }, traffic] = await Promise.all([
+    loadAuditDetails(supabase, id),
+    loadPageTraffic(supabase, project),
+  ]);
   const perUrl = issuesPerUrl(issues);
 
   const severity = SEVERITIES.includes(search.severity as Severity) ? (search.severity as Severity) : undefined;
@@ -90,6 +94,16 @@ export default async function AuditPage({
     issues.filter((i) => (!severity || i.severity === severity) && (!category || i.category === category)),
     locale,
   );
+  // With Search Console data, fix the pages people actually visit first.
+  if (traffic) for (const g of groups) g.issues.sort((a, b) => traffic.clicksFor(b.url) - traffic.clicksFor(a.url));
+  const clicks = (url: string) => {
+    const n = traffic?.clicksFor(url) ?? 0;
+    return n > 0 ? (
+      <span className="ml-2 whitespace-nowrap rounded bg-paper px-1.5 py-0.5 font-sans text-xs text-ink-soft">
+        {t.gsc.clicksBadge(n)}
+      </span>
+    ) : null;
+  };
   const bySeverity = Object.fromEntries(SEVERITIES.map((s) => [s, issues.filter((i) => i.severity === s).length]));
   const href = (next: Search) => {
     const q = new URLSearchParams(
@@ -184,6 +198,7 @@ export default async function AuditPage({
                       <a href={i.url} target="_blank" rel="noreferrer" className="break-all font-mono text-signal hover:underline">
                         {pathOf(i.url)}
                       </a>
+                      {clicks(i.url)}
                       <p className="mt-0.5">{i.text}</p>
                       {i.evidence && <p className="mt-0.5 wrap-anywhere text-ink-soft">↳ {i.evidence}</p>}
                       {i.fix_hint && (
@@ -215,6 +230,7 @@ export default async function AuditPage({
                 <th className="px-4 py-2 font-medium">{t.audit.table.depth}</th>
                 <th className="px-4 py-2 font-medium">{t.audit.table.words}</th>
                 <th className="px-4 py-2 font-medium">{t.audit.table.time}</th>
+                {traffic && <th className="px-4 py-2 text-right font-medium">{t.gsc.trafficColumn}</th>}
                 <th className="px-4 py-2 text-right font-medium">{t.audit.table.issues}</th>
               </tr>
             </thead>
@@ -232,6 +248,7 @@ export default async function AuditPage({
                   <td className="px-4 py-2 tabular-nums">{p.depth}</td>
                   <td className="px-4 py-2 tabular-nums">{p.word_count ?? "–"}</td>
                   <td className="px-4 py-2 tabular-nums">{p.response_time_ms} ms</td>
+                  {traffic && <td className="px-4 py-2 text-right tabular-nums">{traffic.clicksFor(p.final_url)}</td>}
                   <td className="px-4 py-2 text-right tabular-nums">
                     {(perUrl.get(p.final_url) ?? perUrl.get(p.url))?.n ?? 0}
                   </td>

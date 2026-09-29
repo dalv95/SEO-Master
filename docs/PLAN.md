@@ -53,7 +53,7 @@ Kluczowa decyzja: każda reguła w `packages/seo-rules` zwraca `Issue { ruleId, 
 - **Etap 0 ✅**: repo, CLAUDE.md, docs/PLAN.md, szkielet monorepo.
 - **Etap 1 ✅**: crawler + `seo-rules` + zapis do Supabase + prosty raport (+ CLI `pnpm audit:cli`).
 - **Etap 2**: AI rekomendacje (Claude), PageSpeed/CWV, rendering JS (Playwright), eksport CSV/PDF, porównanie audytów per problem, UI po polsku.
-- **Etap 3**: integracja Google Search Console (realne dane zapytań/indeksacji).
+- **Etap 3 (kod gotowy, czeka na test z prawdziwym kontem Google)**: integracja Google Search Console. Kierunek produktu i dalsza roadmapa: [PRODUCT.md](PRODUCT.md).
 - **Etap 4 (fixy — decyzja później)**: wybór kanału wdrażania (PR na GitHub / WordPress REST / snippet JS/Cloudflare Worker) na bazie `fixHint`.
 
 ## Co zrobię po akceptacji (ta sesja)

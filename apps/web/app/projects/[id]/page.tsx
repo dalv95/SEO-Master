@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { RENDER_MODES } from "@seo-master/shared";
 import { startAudit } from "@/app/actions";
 import { AutoRefresh } from "@/components/auto-refresh";
+import { GscCard } from "@/components/gsc-card";
+import { ProjectTabs } from "@/components/project-tabs";
 import { Shell } from "@/components/shell";
 import { Button, Panel, Score } from "@/components/ui";
 import { displayUrl, formatDate, timeAgo } from "@/lib/format";
@@ -10,8 +12,14 @@ import { getT } from "@/lib/i18n";
 import { requireUser } from "@/lib/supabase/server";
 import type { AuditRow, ProjectRow } from "@/lib/types";
 
-export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function ProjectPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ google?: string }>;
+}) {
+  const [{ id }, { google }] = await Promise.all([params, searchParams]);
   const [{ supabase, user }, { t, locale }] = await Promise.all([requireUser(), getT()]);
   const [{ data: project }, { data: audits }] = await Promise.all([
     supabase.from("projects").select("*").eq("id", id).maybeSingle<ProjectRow>(),
@@ -62,6 +70,10 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           <Button disabled={active}>{active ? t.project.inProgress : t.project.runAudit}</Button>
         </form>
       </div>
+
+      <ProjectTabs projectId={project.id} active="audits" t={t} />
+
+      <GscCard project={project} userId={user.id} t={t} locale={locale} banner={google} />
 
       <h2 className="mt-10 text-sm font-semibold uppercase tracking-wider text-ink-soft">{t.project.history}</h2>
       {list.length === 0 ? (
