@@ -11,18 +11,50 @@ export async function signOut() {
   redirect("/login");
 }
 
-export type FormState = { error?: string; sent?: boolean } | undefined;
+export type FormState = { error?: string; info?: string } | undefined;
 
-export async function sendMagicLink(_: FormState, form: FormData): Promise<FormState> {
-  const email = z.string().email().safeParse(form.get("email"));
-  if (!email.success) return { error: "Enter a valid email address." };
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+const credentialsSchema = z.object({
+  email: z.string().trim().email("Enter a valid email address."),
+  password: z.string().min(8, "Password must be at least 8 characters."),
+});
+
+export async function signInWithPassword(_: FormState, form: FormData): Promise<FormState> {
+  const parsed = credentialsSchema.safeParse({ email: form.get("email"), password: form.get("password") });
+  if (!parsed.success) return { error: parsed.error.issues[0]!.message };
   const supabase = await createClient();
-  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const { error } = await supabase.auth.signInWithOtp({
-    email: email.data,
-    options: { emailRedirectTo: `${origin}/auth/callback` },
+  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  if (error) {
+    if (error.code === "email_not_confirmed") return { error: "Confirm your email first — check your inbox." };
+    if (error.code === "invalid_credentials") return { error: "Wrong email or password." };
+    return { error: error.message };
+  }
+  redirect("/");
+}
+
+export async function signUp(_: FormState, form: FormData): Promise<FormState> {
+  const parsed = credentialsSchema.safeParse({ email: form.get("email"), password: form.get("password") });
+  if (!parsed.success) return { error: parsed.error.issues[0]!.message };
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signUp({
+    ...parsed.data,
+    options: { emailRedirectTo: `${siteUrl()}/auth/confirm` },
   });
-  return error ? { error: error.message } : { sent: true };
+  if (error) return { error: error.code === "weak_password" ? "Choose a stronger password." : error.message };
+  // With "Confirm email" disabled in Supabase the user is signed in straight away.
+  if (data.session) redirect("/");
+  return { info: "Account created. Confirm your email via the link we sent, then sign in." };
+}
+
+export async function signInWithGoogle() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: `${siteUrl()}/auth/callback` },
+  });
+  if (error || !data.url) redirect("/login?error=google");
+  redirect(data.url);
 }
 
 const projectSchema = z.object({

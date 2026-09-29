@@ -11,7 +11,7 @@ Full roadmap: `docs/PLAN.md`.
 
 ## Stack
 - pnpm workspaces monorepo, TypeScript (strict) everywhere
-- `apps/web` — Next.js 15 (App Router, server components + server actions), Tailwind CSS v4, Supabase Auth (magic link) via `@supabase/ssr`
+- `apps/web` — Next.js 15 (App Router, server components + server actions), Tailwind CSS v4, Supabase Auth (Google OAuth → `/auth/callback`, email+password; signup confirmation → `/auth/confirm`) via `@supabase/ssr`
 - `apps/worker` — Node process (run with `tsx`) that claims queued rows from the `audits` table (`for update skip locked` — the table *is* the job queue), crawls, audits and writes results with `postgres`. Also has a DB-free CLI.
 - `packages/crawler` — fetch with manual redirect tracking, robots.txt, sitemap.xml, link-first BFS then sitemap URLs. (Playwright rendering for JS sites: planned.)
 - `packages/seo-rules` — audit rules + scoring

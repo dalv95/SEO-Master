@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * Target of the links in Supabase auth emails (templates use `token_hash`).
+ * Target of the signup confirmation email link (template uses `token_hash`).
  * Unlike the PKCE `code` flow, this works when the link is opened in a different
  * browser or device than the one that requested it.
  */

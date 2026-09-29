@@ -16,10 +16,9 @@ pnpm audit:cli https://example.com --max 50
 1. Create a Supabase project and run `supabase/migrations/*.sql` (SQL editor or `supabase db push`).
 2. In Supabase → Authentication:
    - **URL Configuration**: Site URL `http://localhost:3000`.
-   - **Emails → Templates**: in both *Magic link* and *Confirm signup*, point the link at `/auth/confirm` so it works in any browser:
-     ```html
-     <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email">Sign in to SEO Master</a>
-     ```
+   - **Sign In / Providers → Email**: enabled. Turn off *Confirm email* for the simplest local setup; if it stays on, set the *Confirm signup* template link to
+     `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email`.
+   - **Sign In / Providers → Google**: enable it with a Google OAuth client ID/secret (Google Cloud Console → APIs & Services → Credentials → OAuth client ID, type *Web application*, authorized redirect URI `https://<project-ref>.supabase.co/auth/v1/callback`).
 3. `cp .env.example .env.local` and fill in the Supabase URL, anon key and `DATABASE_URL`.
 4. `pnpm dev` — web app on http://localhost:3000 plus the crawler worker.
 
