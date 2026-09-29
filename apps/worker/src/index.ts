@@ -14,11 +14,12 @@ for (const sig of ["SIGINT", "SIGTERM"] as const) {
 async function processNext(): Promise<boolean> {
   const job = await claimNextAudit();
   if (!job) return false;
-  console.log(`▶ audit ${job.id}: ${job.url} (max ${job.max_pages} pages)`);
+  console.log(`▶ audit ${job.id}: ${job.url} (max ${job.max_pages} pages, JS rendering: ${job.render_mode})`);
   try {
     let lastReport = 0;
     const result = await crawl(job.url, {
       maxPages: job.max_pages,
+      render: job.render_mode,
       onPage: (_, n) => {
         if (n - lastReport >= 10) {
           lastReport = n;
@@ -28,7 +29,9 @@ async function processNext(): Promise<boolean> {
     });
     const audit = runAudit(result);
     await saveResults(job.id, result, audit);
-    console.log(`✔ audit ${job.id}: ${result.pages.length} pages, score ${audit.score}, ${audit.issues.length} issues`);
+    console.log(
+      `✔ audit ${job.id}: ${result.pages.length} pages${result.rendering.used ? " (JS rendered)" : ""}, score ${audit.score}, ${audit.issues.length} issues`,
+    );
   } catch (e) {
     console.error(`✖ audit ${job.id} failed`, e);
     await failAudit(job.id, (e as Error).message);

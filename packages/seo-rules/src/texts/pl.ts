@@ -11,6 +11,8 @@ export function plural(n: unknown, one: string, few: string, many: string): stri
 
 const chars = (n: unknown) => plural(n, "znak", "znaki", "znaków");
 const pages = (n: unknown) => plural(n, "inna strona", "inne strony", "innych stron");
+const words = (n: unknown) => plural(n, "słowo", "słowa", "słów");
+const links = (n: unknown) => plural(n, "link", "linki", "linków");
 
 export const pl: RuleTexts = {
   "meta-title-missing": {
@@ -65,7 +67,7 @@ export const pl: RuleTexts = {
   },
   "thin-content": {
     title: "Mało treści",
-    message: (p) => `Strona ma tylko ${plural(p.words, "słowo", "słowa", "słów")} widocznego tekstu (< ${p.min}).`,
+    message: (p) => `Strona ma tylko ${words(p.words)} widocznego tekstu (< ${p.min}).`,
     help: "Strony z małą ilością tekstu rzadko są wysoko w wynikach. Rozbuduj treść o przydatne informacje albo oznacz stronę noindex, jeśli nie jest przeznaczona dla wyszukiwarki.",
   },
   "html-lang-missing": {
@@ -93,6 +95,12 @@ export const pl: RuleTexts = {
     title: "Strona wykluczona (noindex)",
     message: () => "Strona jest wykluczona z wyszukiwarek (noindex). Upewnij się, że to celowe.",
     help: "noindex ukrywa stronę w Google. Usuń go ze stron, które mają się pojawiać w wynikach wyszukiwania.",
+  },
+  "js-dependent-content": {
+    title: "Treść wymaga JavaScriptu",
+    message: (p) =>
+      `Bez JavaScriptu strona ma ${words(p.rawWords)} i ${links(p.rawLinks)}; po wyrenderowaniu ${words(p.words)} i ${links(p.links)}.`,
+    help: "Google renderuje JavaScript, ale z opóźnieniem i nie zawsze w całości; inne wyszukiwarki, crawlery AI i podglądy linków często wcale. Umieść ważną treść i linki w początkowym HTML (renderowanie po stronie serwera lub pre-rendering).",
   },
   "canonical-missing": {
     title: "Brak adresu kanonicznego",

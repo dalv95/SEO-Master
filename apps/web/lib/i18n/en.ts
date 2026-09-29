@@ -53,6 +53,8 @@ export const en = {
 
   project: {
     pageLimit: "Page limit",
+    renderLabel: "JavaScript",
+    renderModes: { auto: "Auto-detect", always: "Always render", never: "Don't render" },
     runAudit: "Run new audit",
     inProgress: "Audit in progress",
     history: "Audit history",
@@ -72,6 +74,12 @@ export const en = {
     progressHelp: "This page updates by itself. The report appears when the crawl is done.",
     pages: (n: number) => s(n, "page"),
     sitemapUrls: (n: number) => `${n} URLs`,
+    rendering: {
+      used: "rendered with JavaScript",
+      "not-needed": "no JavaScript rendering needed",
+      unavailable: "JavaScript rendering unavailable",
+      off: "JavaScript rendering off",
+    },
     whatToFix: "What to fix",
     all: "All",
     filterBySeverity: "Filter by severity",

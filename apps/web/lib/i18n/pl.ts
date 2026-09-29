@@ -54,6 +54,8 @@ export const pl: Dictionary = {
 
   project: {
     pageLimit: "Limit stron",
+    renderLabel: "JavaScript",
+    renderModes: { auto: "Wykryj automatycznie", always: "Zawsze renderuj", never: "Nie renderuj" },
     runAudit: "Uruchom nowy audyt",
     inProgress: "Audyt w trakcie",
     history: "Historia audytów",
@@ -73,6 +75,12 @@ export const pl: Dictionary = {
     progressHelp: "Ta strona odświeża się sama. Raport pojawi się po zakończeniu skanowania.",
     pages,
     sitemapUrls: (n) => plural(n, "adres", "adresy", "adresów"),
+    rendering: {
+      used: "renderowane z JavaScriptem",
+      "not-needed": "renderowanie JS niepotrzebne",
+      unavailable: "renderowanie JS niedostępne",
+      off: "renderowanie JS wyłączone",
+    },
     whatToFix: "Co poprawić",
     all: "Wszystkie",
     filterBySeverity: "Filtruj według wagi",

@@ -74,7 +74,7 @@ export default async function PrintReport({ params }: { params: Promise<{ id: st
               <li key={i.id} className="break-inside-avoid border-l-2 border-rule pl-3 text-xs">
                 <span className="break-all font-mono">{i.url}</span>
                 <span className="text-ink-soft"> — {i.text}</span>
-                {i.evidence && <span className="block break-all text-ink-soft">↳ {i.evidence}</span>}
+                {i.evidence && <span className="block wrap-anywhere text-ink-soft">↳ {i.evidence}</span>}
               </li>
             ))}
           </ul>

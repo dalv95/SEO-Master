@@ -83,6 +83,12 @@ export const en: RuleTexts = {
     message: () => "Page is excluded from search engines (noindex). Make sure this is intentional.",
     help: "noindex keeps a page out of Google. Remove it from pages that should appear in search results.",
   },
+  "js-dependent-content": {
+    title: "Content requires JavaScript",
+    message: (p) =>
+      `Without JavaScript the page has ${s(p.rawWords, "word")} and ${s(p.rawLinks, "link")}; after rendering ${s(p.words, "word")} and ${s(p.links, "link")}.`,
+    help: "Google renders JavaScript, but later and not always completely; other search engines, AI crawlers and link previews often don't. Serve important content and links in the initial HTML (server-side rendering or pre-rendering).",
+  },
   "canonical-missing": {
     title: "Missing canonical",
     message: () => "Page has no rel=canonical link.",

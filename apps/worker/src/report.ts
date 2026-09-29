@@ -7,7 +7,7 @@ const ICON = { critical: "✖", warning: "▲", notice: "•" } as const;
 export function formatReport(crawl: CrawlResult, audit: AuditResult, locale: Locale = "en", maxUrlsPerRule = 5): string {
   const lines: string[] = [];
   lines.push(`\nSEO audit: ${crawl.startUrl}`);
-  lines.push(`Pages crawled: ${crawl.pages.length} · robots.txt: ${crawl.robotsTxt.found ? "yes" : "no"} · sitemap: ${crawl.sitemap.found ? `${crawl.sitemap.urls.length} URLs` : "no"}`);
+  lines.push(`Pages crawled: ${crawl.pages.length} · robots.txt: ${crawl.robotsTxt.found ? "yes" : "no"} · sitemap: ${crawl.sitemap.found ? `${crawl.sitemap.urls.length} URLs` : "no"} · JS rendering: ${crawl.rendering.used ? "yes" : `no${crawl.rendering.reason ? ` (${crawl.rendering.reason})` : ""}`}`);
   lines.push(`\nOverall score: ${audit.score}/100\n`);
   for (const c of audit.categories) {
     lines.push(`  ${c.category.padEnd(16)} ${String(c.score).padStart(3)}  ${"█".repeat(Math.round(c.score / 5)).padEnd(20, "░")}  ${c.issues} issue(s)`);

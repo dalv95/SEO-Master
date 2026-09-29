@@ -60,6 +60,7 @@ export function site(pages: ParsedPage[], over: Partial<CrawlResult> = {}): Craw
     robotsTxt: { found: true, disallowedUrls: [] },
     sitemap: { found: true, urls: [] },
     truncated: false,
+    rendering: { mode: "never", used: false },
     startedAt: "",
     finishedAt: "",
     ...over,

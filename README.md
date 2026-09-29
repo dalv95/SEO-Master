@@ -11,6 +11,8 @@ pnpm install
 pnpm audit:cli https://example.com --max 50
 ```
 
+JavaScript-heavy sites (React/Vue/Angular SPAs) are rendered in headless Chromium when needed. On Linux/CI run `pnpm --filter @seo-master/crawler exec playwright install chromium` once; on macOS the installed Google Chrome is used automatically.
+
 ## Full app
 
 1. Create a Supabase project and run `supabase/migrations/*.sql` (SQL editor or `supabase db push`).

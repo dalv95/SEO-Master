@@ -94,7 +94,12 @@ export interface ParsedPage {
   wordCount: number;
   /** http:// subresources referenced from an https page. */
   mixedContent: string[];
+  /** Set when the page was rendered with JavaScript: what the raw HTML (no JS) contained. */
+  raw?: { title: string | null; wordCount: number; linkCount: number };
 }
+
+export type RenderMode = "auto" | "always" | "never";
+export const RENDER_MODES: RenderMode[] = ["auto", "always", "never"];
 
 export interface CrawlResult {
   startUrl: string;
@@ -104,6 +109,8 @@ export interface CrawlResult {
   sitemap: { found: boolean; urls: string[] };
   /** True when the crawl stopped at maxPages with URLs still queued. */
   truncated: boolean;
+  /** Whether pages were rendered with JavaScript, and why (for "auto"). */
+  rendering: { mode: RenderMode; used: boolean; reason?: string };
   startedAt: string;
   finishedAt: string;
 }
@@ -124,6 +131,7 @@ export const auditJobSchema = z.object({
   auditId: z.string().uuid(),
   url: z.string().url(),
   maxPages: z.number().int().min(1).max(5000).default(500),
+  renderMode: z.enum(["auto", "always", "never"]).default("auto"),
 });
 
 export type AuditJob = z.infer<typeof auditJobSchema>;

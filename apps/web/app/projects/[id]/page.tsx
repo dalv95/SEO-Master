@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { RENDER_MODES } from "@seo-master/shared";
 import { startAudit } from "@/app/actions";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { Shell } from "@/components/shell";
@@ -41,6 +42,21 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           <select id="maxPages" name="maxPages" defaultValue="500" className="rounded-md border border-rule bg-panel px-2 py-2 text-sm">
             {[50, 100, 500, 1000, 5000].map((n) => (
               <option key={n}>{n}</option>
+            ))}
+          </select>
+          <label htmlFor="renderMode" className="text-sm text-ink-soft">
+            {t.project.renderLabel}
+          </label>
+          <select
+            id="renderMode"
+            name="renderMode"
+            defaultValue={list[0]?.render_mode ?? "auto"}
+            className="rounded-md border border-rule bg-panel px-2 py-2 text-sm"
+          >
+            {RENDER_MODES.map((m) => (
+              <option key={m} value={m}>
+                {t.project.renderModes[m]}
+              </option>
             ))}
           </select>
           <Button disabled={active}>{active ? t.project.inProgress : t.project.runAudit}</Button>

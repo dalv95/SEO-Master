@@ -80,6 +80,20 @@ describe("runAudit", () => {
     expect(r.issues.filter((i) => i.ruleId === "img-alt-missing")).toHaveLength(1);
   });
 
+  it("flags content that only appears after JavaScript rendering", () => {
+    const rendered = htmlPage("/a", goodHtml("/a", "", `<a href="/">Home</a>`), {
+      raw: { title: null, wordCount: 3, linkCount: 0 },
+    });
+    const same = htmlPage("/b", goodHtml("/b", "", `<a href="/">Home</a>`), {
+      raw: { title: "t", wordCount: 250, linkCount: 1 },
+    });
+    const h = htmlPage("/", goodHtml("/", "", `<a href="/a">A</a><a href="/b">B</a>`), { depth: 0 });
+    const r = runAudit(site([h, rendered, same]));
+    const js = r.issues.filter((i) => i.ruleId === "js-dependent-content");
+    expect(js.map((i) => i.url)).toEqual([`${ORIGIN}/a`]);
+    expect(js[0]?.params).toMatchObject({ rawWords: 3, rawLinks: 0 });
+  });
+
   it("lowers the score proportionally to affected pages", () => {
     const noTitle = (p: string) =>
       htmlPage(p, goodHtml(p, "", `<a href="/">h</a>`).replace(/<title>.*<\/title>/, ""));

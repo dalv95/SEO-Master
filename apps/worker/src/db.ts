@@ -1,5 +1,5 @@
 import postgres from "postgres";
-import type { AuditResult, CrawlResult } from "@seo-master/shared";
+import type { AuditResult, CrawlResult, RenderMode } from "@seo-master/shared";
 import { env } from "./env";
 
 export const sql = postgres(env.DATABASE_URL, { max: 5, prepare: false });
@@ -8,6 +8,7 @@ export interface ClaimedAudit {
   id: string;
   url: string;
   max_pages: number;
+  render_mode: RenderMode;
 }
 
 /** Atomically take the oldest queued audit (safe with multiple workers). */
@@ -19,7 +20,7 @@ export async function claimNextAudit(): Promise<ClaimedAudit | null> {
       select id from audits where status = 'queued' order by created_at
       for update skip locked limit 1
     )
-    returning a.id, p.url, a.max_pages`;
+    returning a.id, p.url, a.max_pages, a.render_mode`;
   return rows[0] ?? null;
 }
 
@@ -72,6 +73,7 @@ export async function saveResults(auditId: string, crawl: CrawlResult, audit: Au
         crawl_summary = ${tx.json({
           robotsTxt: { found: crawl.robotsTxt.found, disallowed: crawl.robotsTxt.disallowedUrls.length },
           sitemap: { found: crawl.sitemap.found, urls: crawl.sitemap.urls.length },
+          rendering: crawl.rendering,
         })}
       where id = ${auditId}`;
   });

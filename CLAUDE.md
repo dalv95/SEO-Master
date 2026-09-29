@@ -13,7 +13,7 @@ Full roadmap: `docs/PLAN.md`.
 - pnpm workspaces monorepo, TypeScript (strict) everywhere
 - `apps/web` — Next.js 15 (App Router, server components + server actions), Tailwind CSS v4, Supabase Auth (Google OAuth → `/auth/callback`, email+password; signup confirmation → `/auth/confirm`) via `@supabase/ssr`
 - `apps/worker` — Node process (run with `tsx`) that claims queued rows from the `audits` table (`for update skip locked` — the table *is* the job queue), crawls, audits and writes results with `postgres`. Also has a DB-free CLI.
-- `packages/crawler` — fetch with manual redirect tracking, robots.txt, sitemap.xml, link-first BFS then sitemap URLs. (Playwright rendering for JS sites: planned.)
+- `packages/crawler` — fetch with manual redirect tracking, robots.txt, sitemap.xml, link-first BFS then sitemap URLs. JavaScript rendering via Playwright (`src/render.ts`): per audit `render_mode` auto|always|never. "auto" renders the start page once and keeps rendering only if `contentNeedsJs()` says JS changes what crawlers see. Status/redirects/headers always come from the plain HTTP fetch; rendered pages keep raw-HTML stats in `page.raw` (used by the `js-dependent-content` rule). Browser: Playwright's bundled Chromium, else installed Google Chrome (`channel: "chrome"` — needed on macOS 13, which current Playwright Chromium doesn't support), or `CHROME_PATH`.
 - `packages/seo-rules` — audit rules + scoring
 - `packages/shared` — shared types (`Issue`, `Severity`, `FixHint`, …) and zod schemas
 - Supabase (Postgres + Auth + RLS); SQL migrations in `supabase/migrations/`. Project: `seo-master`, ref `bwaospsabqcpwddrrrhq` (eu-central-1, free plan) — apply new migrations there via the Supabase MCP `apply_migration`, then check `get_advisors`.
@@ -27,8 +27,8 @@ Packages export TypeScript source directly (`main: src/index.ts`) — no build s
 ```bash
 pnpm install
 pnpm dev                                  # web (localhost:3000) + worker
-pnpm audit:cli https://example.com --max 50 [--json out.json]   # audit without DB/UI
-pnpm test                                 # vitest (crawler + seo-rules)
+pnpm audit:cli https://example.com --max 50 [--lang pl] [--render auto|always|never] [--json out.json]   # audit without DB/UI
+pnpm test                                 # vitest (crawler + seo-rules); rendering tests auto-skip without a browser
 pnpm typecheck
 pnpm --filter @seo-master/web build
 ```

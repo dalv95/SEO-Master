@@ -24,6 +24,19 @@ export const indexabilityRules = [
         : null;
     return src ? { evidence: src } : null;
   }),
+  // Only for pages crawled with JS rendering: compares what crawlers get without JS.
+  pageRule({ id: "js-dependent-content", category: "indexability", severity: "warning" }, (p) => {
+    const raw = p.raw;
+    if (!raw) return null;
+    const lostText = p.wordCount >= 100 && raw.wordCount < p.wordCount * 0.5;
+    const lostLinks = p.links.length >= 5 && raw.linkCount < p.links.length * 0.5;
+    const lostTitle = !raw.title && !!p.title;
+    if (!lostText && !lostLinks && !lostTitle) return null;
+    return {
+      params: { rawWords: raw.wordCount, words: p.wordCount, rawLinks: raw.linkCount, links: p.links.length },
+      ...(lostTitle ? { evidence: "<title> is set by JavaScript" } : {}),
+    };
+  }),
   pageRule(
     { id: "canonical-missing", category: "indexability", severity: "notice" },
     (p) => !p.canonical && { fixHint: { action: "add", target: 'head > link[rel="canonical"]', value: p.finalUrl } },

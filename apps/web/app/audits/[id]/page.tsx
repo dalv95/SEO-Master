@@ -178,7 +178,7 @@ export default async function AuditPage({
                         {pathOf(i.url)}
                       </a>
                       <p className="mt-0.5">{i.text}</p>
-                      {i.evidence && <p className="mt-0.5 break-all text-ink-soft">↳ {i.evidence}</p>}
+                      {i.evidence && <p className="mt-0.5 wrap-anywhere text-ink-soft">↳ {i.evidence}</p>}
                       {i.fix_hint && (
                         <p className="mt-1 font-mono text-xs text-ink-soft">
                           {t.audit.fix}: {i.fix_hint.action} <span className="text-ink">{i.fix_hint.target}</span>

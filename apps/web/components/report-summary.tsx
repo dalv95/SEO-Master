@@ -37,6 +37,18 @@ export function ReportSummary({
           <p className="mt-1 text-xs text-ink-soft">
             robots.txt {summary?.robotsTxt.found ? "✓" : "✗"} · sitemap{" "}
             {summary?.sitemap.found ? `✓ ${t.audit.sitemapUrls(summary.sitemap.urls)}` : "✗"}
+            {summary?.rendering && (
+              <>
+                {" · "}
+                {summary.rendering.used
+                  ? t.audit.rendering.used
+                  : summary.rendering.mode === "never"
+                    ? t.audit.rendering.off
+                    : summary.rendering.reason === "unavailable"
+                      ? t.audit.rendering.unavailable
+                      : t.audit.rendering["not-needed"]}
+              </>
+            )}
           </p>
         </div>
       </div>

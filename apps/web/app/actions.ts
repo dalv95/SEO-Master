@@ -99,14 +99,19 @@ export async function createProject(_: FormState, form: FormData): Promise<FormS
 const auditSchema = z.object({
   projectId: z.string().uuid(),
   maxPages: z.coerce.number().int().min(1).max(5000),
+  renderMode: z.enum(["auto", "always", "never"]),
 });
 
 export async function startAudit(form: FormData) {
-  const parsed = auditSchema.parse({ projectId: form.get("projectId"), maxPages: form.get("maxPages") ?? 500 });
+  const parsed = auditSchema.parse({
+    projectId: form.get("projectId"),
+    maxPages: form.get("maxPages") ?? 500,
+    renderMode: form.get("renderMode") ?? "auto",
+  });
   const { supabase } = await requireUser();
   const { data, error } = await supabase
     .from("audits")
-    .insert({ project_id: parsed.projectId, max_pages: parsed.maxPages })
+    .insert({ project_id: parsed.projectId, max_pages: parsed.maxPages, render_mode: parsed.renderMode })
     .select("id")
     .single();
   if (error) throw new Error(error.message);
