@@ -7,9 +7,9 @@ W tej sesji: dokumentacja planu + `CLAUDE.md` + szkielet projektu + repozytorium
 
 ## Stack (wybrany)
 - **Next.js 15 (App Router) + TypeScript** — UI + API routes, jeden język w całym projekcie
-- **Tailwind CSS + shadcn/ui** — dashboard, raporty
+- **Tailwind CSS v4** — dashboard, raporty
 - **Supabase** (Postgres + Auth + RLS) — projekty, audyty, wyniki; Supabase MCP jest już podłączony
-- **Worker crawlera**: osobny proces Node (`apps/worker`) z kolejką **pg-boss** (kolejka w Postgresie — bez dodatkowego Redisa), **undici/fetch + cheerio** do parsowania HTML, **Playwright** dla stron renderowanych JS
+- **Worker crawlera**: osobny proces Node (`apps/worker`); kolejką jest sama tabela `audits` (`for update skip locked`) — bez pg-boss i Redisa. **fetch + cheerio** do parsowania HTML, **Playwright** dla stron renderowanych JS (później)
 - **Lighthouse / PageSpeed Insights API** — Core Web Vitals
 - **Claude API (`claude-sonnet-5-5`)** — priorytetyzacja problemów i rekomendacje w języku naturalnym (później: generowanie poprawek)
 - **pnpm workspaces** (monorepo), **Vitest** (testy), **ESLint + Prettier**
@@ -50,9 +50,9 @@ Kluczowa decyzja: każda reguła w `packages/seo-rules` zwraca `Issue { ruleId, 
 7. **Historia audytów**: porównanie z poprzednim (co się poprawiło/pogorszyło).
 
 ## Roadmapa
-- **Etap 0 (teraz)**: repo, CLAUDE.md, docs/PLAN.md, szkielet monorepo.
-- **Etap 1**: crawler + `seo-rules` + zapis do Supabase + prosty raport.
-- **Etap 2**: dashboard, scoring, historia, AI rekomendacje, PSI.
+- **Etap 0 ✅**: repo, CLAUDE.md, docs/PLAN.md, szkielet monorepo.
+- **Etap 1 ✅**: crawler + `seo-rules` + zapis do Supabase + prosty raport (+ CLI `pnpm audit:cli`).
+- **Etap 2**: AI rekomendacje (Claude), PageSpeed/CWV, rendering JS (Playwright), eksport CSV/PDF, porównanie audytów per problem, UI po polsku.
 - **Etap 3**: integracja Google Search Console (realne dane zapytań/indeksacji).
 - **Etap 4 (fixy — decyzja później)**: wybór kanału wdrażania (PR na GitHub / WordPress REST / snippet JS/Cloudflare Worker) na bazie `fixHint`.
 
