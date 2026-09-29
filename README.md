@@ -14,7 +14,12 @@ pnpm audit:cli https://example.com --max 50
 ## Full app
 
 1. Create a Supabase project and run `supabase/migrations/*.sql` (SQL editor or `supabase db push`).
-2. In Supabase → Authentication → URL Configuration, add `http://localhost:3000/auth/callback` as a redirect URL.
+2. In Supabase → Authentication:
+   - **URL Configuration**: Site URL `http://localhost:3000`.
+   - **Emails → Templates**: in both *Magic link* and *Confirm signup*, point the link at `/auth/confirm` so it works in any browser:
+     ```html
+     <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email">Sign in to SEO Master</a>
+     ```
 3. `cp .env.example .env.local` and fill in the Supabase URL, anon key and `DATABASE_URL`.
 4. `pnpm dev` — web app on http://localhost:3000 plus the crawler worker.
 

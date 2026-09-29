@@ -10,7 +10,10 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       <h1 className="mt-6 text-3xl font-bold tracking-tight">Sign in</h1>
       <p className="mt-2 text-ink-soft">We&apos;ll email you a link — no password needed.</p>
       {error && (
-        <p className="mt-4 text-sm text-critical">That sign-in link is invalid or has expired. Request a new one.</p>
+        <p className="mt-4 text-sm text-critical">
+          That sign-in link has already been used or has expired. Each link works once — request a new one and open
+          only the newest email.
+        </p>
       )}
       <LoginForm />
     </main>
